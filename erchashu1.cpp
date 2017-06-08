@@ -13,6 +13,8 @@ public:
     T getData(){return t;}
     void setLeft(Node<T> * n){left = n;n->parent=this;}
     void setRight(Node<T> * n){right = n;n->parent=this;}
+    int leafsAmount();
+    int depth();
 private:
     T t;
     Node<T> * left;
@@ -27,52 +29,23 @@ Node<T>::~Node()
 }
 
 template<typename T>
-void firstPrint(Node<T> * t){
-    cout << t->getData() <<' ';
-    if(t->getLeft()!=NULL){
-        firstPrint(t->getLeft());
-    }
-    if(t->getRight()!=NULL){
-        firstPrint(t->getRight());
-    }
-}
-// template<typename T>
-// void firstPrint2(Node<T> * t){
-//     Node<T> * p = t;
-//     while(p!=t->getParent()){
-//         cout << p->getData();
-//         if(p->getLeft()!=NULL)
-//             p = p->getLeft();
-//         else if(p->getRight()!=NULL)
-//             p = p->getRight();
-//         else {
-//             for(;(p!=t->getParent()&&p->getRight()==NULL);p=p->parent());
-//             p = p->getRight();
-//         }
-//     }
-// }
-
-
-template<typename T>
-void middlePrint(Node<T> * t){
-    if(t->getLeft()!=NULL){
-        middlePrint(t->getLeft());
-    }
-    cout << t->getData() <<' ';
-    if(t->getRight()!=NULL){
-        middlePrint(t->getRight());
-    }
+int Node<T>::leafsAmount(){
+    int result = 0;
+    if(getLeft()!=NULL)result += getLeft()->leafsAmount(); 
+    if(getRight()!=NULL)result += getRight()->leafsAmount();
+    if(result==0)return 1;
+    else return result;
 }
 
 template<typename T>
-void lastPrint(Node<T> * t){
-    if(t->getLeft()!=NULL){
-        lastPrint(t->getLeft());
+int Node<T>::depth(){
+    if(getLeft()==NULL&&getRight()==NULL)return 1;
+    else{
+        int d1 = (getLeft()==NULL)? 0 : (getLeft()->depth());
+        int d2 = (getRight()==NULL)? 0 : (getRight()->depth());
+        return d1>d2 ? d1+1 : d2+1;
     }
-    if(t->getRight()!=NULL){
-        lastPrint(t->getRight());
-    }
-    cout << t->getData() <<' ';
+
 }
 
 int main(){
@@ -101,14 +74,7 @@ int main(){
             p = p->getLeft();
         }
     }
-    cout << "前序遍历结果：";
-    firstPrint(root);
-    cout << '\n';
-    cout << "中序遍历结果：";
-    middlePrint(root);
-    cout << '\n';
-    cout << "后序遍历结果：";
-    lastPrint(root);
-    cout << '\n';
+    cout << "leafs=" << root->leafsAmount()<<endl;
+    cout << "Depth=" << root->depth()<<endl;
     return 0;
 }

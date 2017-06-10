@@ -22,8 +22,8 @@ private:
 template<typename T>
 Node<T>::~Node()
 {
-    delete left;
-    delete right;
+    if(left!=NULL)delete left;
+    if(right!=NULL)delete right;
 }
 
 template<typename T>

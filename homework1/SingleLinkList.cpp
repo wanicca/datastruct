@@ -21,14 +21,14 @@ template<class T> class LinkedList{
     Node<T> *getEnd()const {return end;}
     Node<T> *getNode(int n)const;
     int length()const {return len;}
-    int findAt(T t,int start)const ;
+    int findAt(T t,int start=0)const ;
     T& get(int n)const;
     bool set(int n,T t);
     bool insert(int n,T t);
-    void append(T t);
     bool remove(int n);
     // bool removeAll(function<bool(T)> filter);
     bool removeAll(bool (*filter)(T t));
+    void append(T t);
     void makeEmpty();
     LinkedList<T> operator+(LinkedList<T>& l);
     LinkedList<T> operator*(LinkedList<T>& l);
@@ -61,7 +61,7 @@ Node<T> * LinkedList<T>::getNode(int n)const{
     return p;
 }
 template<class T>
-int LinkedList<T>::findAt(T t,int start=0)const {
+int LinkedList<T>::findAt(T t,int start)const {
     int at = start;
     Node<T> *p=head->next;
     while(p){

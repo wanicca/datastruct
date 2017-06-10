@@ -11,9 +11,13 @@ public:
     TreeNode<T> * getLeft(){return left;}
     TreeNode<T> * getRight(){return right;}
     TreeNode<T> * getParent(){return parent;}
+    TreeNode<T> * middleNext();
     T getData(){return t;}
-    void setLeft(TreeNode<T> * n){left = n;n->parent=this;}
-    void setRight(TreeNode<T> * n){right = n;n->parent=this;}
+    void setData(T _t){t = _t;}
+    void setLeft(TreeNode<T> * n){left = n;if(n!=NULL)n->parent=this;}
+    void setRight(TreeNode<T> * n){right = n;if(n!=NULL)n->parent=this;}
+    void deleteLeft();
+    void deleteRight();
 private:
     T t;
     TreeNode<T> * left;
@@ -23,22 +27,77 @@ private:
 template<typename T>
 TreeNode<T>::~TreeNode()
 {
-    delete left;
-    delete right;
+    // 移除递归删除
+    // if(left!=NULL)delete left;
+    // if(right!=NULL)delete right;
+}
+template<typename T>
+void TreeNode<T>::deleteLeft(){
+    if(getLeft()!=NULL){
+        getLeft()->deleteLeft();
+        delete left;
+    }
+}
+
+template<typename T>
+void TreeNode<T>::deleteRight(){
+    if(getRight()!=NULL){
+        getRight()->deleteRight();
+        delete right;
+    }
+}
+
+template<typename T>
+TreeNode<T> * TreeNode<T>::middleNext(){
+    TreeNode<T> * p = NULL;
+    if(getRight()!=NULL){
+        p = getRight();
+        while(p->getLeft()!=NULL)p=p->getLeft();
+    }else if(getParent()!=NULL){
+        if(this == getParent()->getLeft()){
+            p = getParent();
+        }else{
+            p = getParent();
+            while(p->getParent()!=NULL&&p==p->getParent()->getRight()){
+                p = p->getParent();
+            }
+            p = p->getParent();
+        }
+    }
+    return p;
 }
 
 template <typename T>
 class SortedTree
 {
 public:
-    SortedTree(){};
-    ~SortedTree() {if(root!=NULL)delete root;};
+    SortedTree(){root = NULL;};
+    ~SortedTree();
+    TreeNode<T> * middleFirst();
+    bool remove(T t);
     void add(T t);
-    void remove(T t);
+    void removeNode(TreeNode<T> * node);
     void middlePrint();
 private:
     TreeNode<T> * root;
 };
+
+template<typename T>
+SortedTree<T>::~SortedTree(){
+    if(root!=NULL){
+        root->deleteLeft();
+        root->deleteRight();
+    }
+}
+
+template<typename T>
+TreeNode<T> * SortedTree<T>::middleFirst(){
+    TreeNode<T> *p = root;
+    while(p->getLeft()!=NULL){
+        p = p->getLeft();
+    }
+    return p;
+}
 
 template<typename T>
 void SortedTree<T>::add(T t){
@@ -67,20 +126,96 @@ void SortedTree<T>::add(T t){
 }
 
 template<typename T>
-void SortedTree<T>::remove(T t){
+bool SortedTree<T>::remove(T t){
     TreeNode<T> * p = root;
     while(true){
+        if(p==NULL)return false;
         if(p->getData()==t){
+            //TODO 找到后删除
+            removeNode(p);
+            break;
+        }else{
+            if(t>p->getData())p = p->getRight();
+            else p = p->getLeft();
+        }
+    }
+    return true;
+}
 
+template<typename T>
+void SortedTree<T>::removeNode(TreeNode<T> * node){
+    if(node == NULL) return ;
+    if(node->getLeft()==NULL){
+        if(node->getRight()==NULL){
+            if(node == root){
+                root = NULL;
+                delete node;
+            }else if(node==node->getParent()->getLeft()){
+                node->getParent()->setLeft(NULL);
+                delete node;
+            }else{
+                node->getParent()->setRight(NULL);
+                delete node;
+            }
+        }else{
+            if(node == root){
+                root = node -> getRight();
+                delete node;
+            }else if(node==node->getParent()->getLeft()){
+                node->getParent()->setLeft(node->getRight());
+                delete node;
+            }else{
+                node->getParent()->setRight(node->getRight());
+                delete node;
+            }
+        }
+    }else{
+        if(node->getRight()==NULL){
+            if(node == root){
+                root = node -> getLeft();
+                delete node;
+            }else if(node==node->getParent()->getLeft()){
+                node->getParent()->setLeft(node->getLeft());
+                delete node;
+            }else{
+                node->getParent()->setRight(node->getRight());
+                delete node;
+            }
+        }else{
+            TreeNode<T> * next = node->middleNext();
+            node -> setData(next -> getData());
+            removeNode(next);
         }
     }
 }
 
 template<typename T>
 void SortedTree<T>::middlePrint(){
-    
+    TreeNode<T> * p = middleFirst();
+    while(p!=NULL){
+        cout << p->getData() << "  ";
+        p = p->middleNext();
+    }
+    cout << endl;
 }
 int main(){
-
+    int n,t;
+    SortedTree<int> st;
+    cin >> n;
+    cout << "原始数据：";
+    while(n--){
+        cin >> t;
+        cout << t << " ";
+        st.add(t);
+    }
+    cout << endl;
+    cout << "中序遍历结果：";
+    st.middlePrint();
+    cin >> t;
+    cout << "删除结点后结果：";
+    if(st.remove(t))
+        st.middlePrint();
+    else
+        cout << "没有" << t << "结点。" << endl;
     return 0;
 }
